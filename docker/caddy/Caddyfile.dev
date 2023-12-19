@@ -1,0 +1,22 @@
+import Caddyfile.base
+
+# SITES
+# https://caddyserver.com/docs/caddyfile-tutorial#multiple-sites
+
+{$DOMAIN}:{$PORT}:80 {
+    basicauth {
+        # basicauth to keep the bots out
+        # user:pass | 'caddy:caddy'
+        # - encrypt password using 'caddy hash-password' command
+        caddy $2a$14$k19kcFRiFlbZjeaYNkSgbOhZpe8k/4IxHN1lBVmsOkBTEsq1Dl/5u
+    }
+    # https://caddyserver.com/docs/caddyfile/directives/basicauth#basicauth
+
+    import site_base
+
+    # reverse proxy all requests
+    # https://caddyserver.com/docs/caddyfile/patterns#reverse-proxy
+    reverse_proxy http://django:8000 {
+        trusted_proxies private_ranges
+    }
+}

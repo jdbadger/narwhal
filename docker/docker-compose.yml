@@ -1,0 +1,60 @@
+version: "3.9"
+
+x-default-django:
+  &default-django
+  build:
+    context: ../django
+    dockerfile: dockerfiles/Dockerfile
+    args:
+      UNAME: "${USER:-app}"
+      UID: "${UID:-1000}"
+  env_file:
+    - ..django/core/.env
+  volumes:
+    - ../django:/home/app/django
+  tty: true
+  stdin_open: true
+
+services:
+  redis:
+  image: redis:7
+  command: redis-server --save 60 1 --appendonly yes --loglevel warning
+  restart: unless-stopped
+
+  django:
+    << : *default-django
+    command: python -m gunicorn core.asgi:application -k uvicorn.workers.UvicornWorker
+    expose:
+      - "8000"
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  huey:
+    << : *default-django
+    command: django-admin run_huey -w 2
+    depends_on:
+      - django
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2
+    command: "caddy run --config /etc/caddy/${CADDYFILE} --adapter caddyfile"
+    env_file:
+      - .env
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./caddy:/etc/caddy
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - django
+    resart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:

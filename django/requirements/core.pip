@@ -1,0 +1,12 @@
+Django==4.2.8
+django-environ
+django-filter
+django-storages[s3]
+gunicorn
+hiredis
+huey
+psycopg[binary]
+python-dateutil
+redis[hiredis]
+uvicorn
+whitenoise[brotli]

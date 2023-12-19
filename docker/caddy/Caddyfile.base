@@ -1,0 +1,32 @@
+# SNIPPETS
+# https://caddyserver.com/docs/caddyfile/concepts#snippets
+
+(site_base) {
+    root * /etc/caddy/srv
+    file_server
+    # https://caddyserver.com/docs/caddyfile/patterns#static-file-server
+
+    handle_errors {    
+        @4xx expression `{err.status_code} >= 400 && {err.status_code} < 500`
+        handle @4xx {
+            rewrite * /error_4xx.html
+        }
+
+        @5xx expression `{err.status_code} >= 500 && {err.status_code} < 600`
+        handle @5xx {
+            rewrite * /error_5xx.html
+        }
+
+        # rewrite all all other errors to /error.html
+        # https://caddyserver.com/docs/caddyfile/directives/rewrite#rewrite
+        rewrite * /error.html
+
+        # enable templates
+        # https://caddyserver.com/docs/caddyfile/directives/templates#templates
+	    templates
+	    
+        file_server
+    }
+    # ...there are many other ways to handle errors...
+    # https://caddyserver.com/docs/caddyfile/directives/handle_errors
+}

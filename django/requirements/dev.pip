@@ -1,0 +1,5 @@
+-r core.pip
+django-debug-toolbar
+pytest
+pytest-django
+pytest-xdist

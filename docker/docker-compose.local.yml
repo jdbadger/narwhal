@@ -1,0 +1,70 @@
+version: "3.8"
+
+x-default-django:
+  &default-django
+  build:
+    context: ../django
+    dockerfile: dockerfiles/Dockerfile.local
+    args:
+      UNAME: "${USER:-app}"
+      UID: "${UID:-1000}"
+  env_file:
+    - ../django/.env
+  volumes:
+    - ../django:/home/${USER:-app}/code
+  tty: true
+  stdin_open: true
+
+services:
+  #--development only--#
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: django
+      POSTGRES_PASSWORD: django
+      POSTGRES_DB: django
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    restart: unless-stopped
+  #--------------------#
+
+  redis:
+    image: redis:7
+    command: redis-server --save 60 1 --appendonly yes --loglevel warning
+    restart: unless-stopped
+
+  django:
+    << : *default-django
+    environment:
+      - DJANGO_SUPERUSER_PASSWORD=secret
+    command: python manage.py runserver 0.0.0.0:8000 --nostatic
+    entrypoint: /home/${USER:-app}/code/entrypoint.dev.sh
+    expose:
+      - "8000"
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  huey:
+    << : *default-django
+    command: python manage.py run_huey -w 2
+    depends_on:
+      - django
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2
+    command: "caddy run --config /etc/caddy/${CADDYFILE:-Caddyfile.local} --adapter caddyfile"
+    env_file:
+      - .env
+    ports:
+      - "${PORT:-81}:${PORT:-81}"
+    volumes:
+      - ./caddy:/etc/caddy
+    depends_on:
+      - django
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
