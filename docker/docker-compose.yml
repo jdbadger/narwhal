@@ -9,7 +9,7 @@ x-default-django:
       UNAME: "${USER:-app}"
       UID: "${UID:-1000}"
   env_file:
-    - ..django/core/.env
+    - ../django/.env
   volumes:
     - ../django:/home/app/django
   tty: true
@@ -17,9 +17,9 @@ x-default-django:
 
 services:
   redis:
-  image: redis:7
-  command: redis-server --save 60 1 --appendonly yes --loglevel warning
-  restart: unless-stopped
+    image: redis:7
+    command: redis-server --save 60 1 --appendonly yes --loglevel warning
+    restart: unless-stopped
 
   django:
     << : *default-django
@@ -27,7 +27,6 @@ services:
     expose:
       - "8000"
     depends_on:
-      - postgres
       - redis
     restart: unless-stopped
 
@@ -53,7 +52,7 @@ services:
       - caddy_config:/config
     depends_on:
       - django
-    resart: unless-stopped
+    restart: unless-stopped
 
 volumes:
   caddy_data:

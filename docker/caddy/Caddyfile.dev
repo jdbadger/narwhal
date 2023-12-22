@@ -3,7 +3,7 @@ import Caddyfile.base
 # SITES
 # https://caddyserver.com/docs/caddyfile-tutorial#multiple-sites
 
-{$DOMAIN}:{$PORT}:80 {
+{$DOMAIN}:{$PORT} {
     basicauth {
         # basicauth to keep the bots out
         # user:pass | 'caddy:caddy'
