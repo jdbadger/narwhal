@@ -11,5 +11,4 @@ import Caddyfile.base
     reverse_proxy http://django:8000 {
         trusted_proxies private_ranges
     }
-
 }
