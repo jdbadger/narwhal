@@ -4,11 +4,11 @@ Narwhal is my personal containerized Django starter project template. It's meant
 
 Narwhal provides a containerized web application based on Docker with multiple services orchestrated by Docker Compose. Services include:
 
-- A **Caddy** server (automatic HTTPS/TLS!) to manage traffic, with a reverse proxy to Django (https://caddyserver.com/docs/). The server is configured per environment via caddyfiles. It's a relatively basic config. Customize it according to project requirements.
+- A **Caddy** server (automatic HTTPS/TLS!) to manage traffic, with a reverse proxy to Django. The server is configured per environment via caddyfiles. It's a relatively basic config. Customize it according to project requirements (https://caddyserver.com/docs/).
 
 - A **Redis** instance serving as both a cache backend and task queue (https://hub.docker.com/_/redis).
 
-- A **PostgreSQL** databse for development (https://hub.docker.com/_/postgres).
+- A **PostgreSQL** database for development (https://hub.docker.com/_/postgres).
 
 - A task runner implemented with the help of the excellent **Huey** library (https://huey.readthedocs.io/en/latest/).
 
@@ -24,7 +24,7 @@ Narwhal provides a containerized web application based on Docker with multiple s
 
   - For development, a default superuser and password.
 
-Narwhal **_does not_** provide an environment/secrets management soltion. If you use this template, environment/secrets management is your responsibility.
+Narwhal **_does not_** provide an environment/secrets management solution. If you use this template, environment/secrets management is your responsibility.
 
 # Dev Setup
 
@@ -49,7 +49,7 @@ Narwhal **_does not_** provide an environment/secrets management soltion. If you
 
   - Add or change any other `.env` definitions according to your project requirements.
 
-  - Optionally customize Caddyfiles. Need dedicated subdomains for api and client services? Just edit `docker/caddy/Caddyfile.*` accordingly.
+  - Optionally customize caddyfiles. Need dedicated subdomains for api and client services? Just edit `docker/caddy/Caddyfile.*` accordingly.
 
   - Customize Caddy-served templates in `docker/caddy/srv/`. These include references to `Narwhal`. Change them according to your project requirements.
 
