@@ -20,17 +20,17 @@ ENV PYTHONUNBUFFERED 1
 COPY requirements /requirements
 RUN python3 -m venv /venv
 RUN /venv/bin/pip install --upgrade pip
-RUN /venv/bin/pip install -r /requirements/dev.pip
+RUN /venv/bin/pip install -r /requirements/requirements.dev.pip
 
 #--FINAL--#
 
 FROM base as final
 
 # install system dependencies
-# RUN apt update && \
-#     apt install -y --no-install-recommends \
-#     ---add packages here--- \
-#     && rm -rf /var/lib/apt/lists/*
+RUN apt update && \
+    apt install -y --no-install-recommends \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
 
 ARG UNAME
 ARG UID
@@ -60,7 +60,7 @@ COPY --from=builder /venv /venv
 ENV PATH=/venv/bin:$PATH
 
 # make entrypoint script executable 
-RUN chmod +x  $APP_HOME/entrypoint.sh
+RUN chmod +x  $APP_HOME/entrypoint.local.sh
 
 # chown all the files to the app user
 RUN chown -R ${UNAME}:${UNAME} $HOME

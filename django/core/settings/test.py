@@ -5,9 +5,9 @@ from django.core.management.utils import get_random_secret_key
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+SECRET_KEY = env.get_value('SECRET_KEY', default=get_random_secret_key())
 
-SECRET_KEY = get_random_secret_key()
+ALLOWED_HOSTS = []
 
 AUTH_PASSWORD_VALIDATORS = [
     {
