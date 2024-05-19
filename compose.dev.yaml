@@ -1,19 +1,21 @@
-version: "3.8"
-
 x-default-django:
   &default-django
   build:
-    context: ../django
-    dockerfile: dockerfiles/Dockerfile.local
+    context: ./django
+    dockerfile: Dockerfile
     args:
       UNAME: "${USER:-app}"
       UID: "${UID:-1000}"
+      REQUIREMENTS: "${REQUIREMENTS:-/requirements/dev.pip}"
   env_file:
-    - ../django/.env
+    - .env
+  environment:
+    environment:
+    DJANGO_SETTINGS_MODULE: core.settings.dev
+    DJANGO_SUPERUSER_EMAIL: super@example.com
+    DJANGO_SUPERUSER_PASSWORD: secret
   volumes:
-    - ../django:/home/${USER:-app}/code
-  tty: true
-  stdin_open: true
+    - ./django:/home/${USER:-app}/code
 
 services:
   #--development only--#
@@ -35,10 +37,8 @@ services:
 
   django:
     << : *default-django
-    environment:
-      - DJANGO_SUPERUSER_PASSWORD=secret
     command: python manage.py runserver 0.0.0.0:8000 --nostatic
-    entrypoint: /home/${USER:-app}/code/entrypoint.dev.sh
+    entrypoint: /home/${USER:-app}/code/entrypoint.sh
     expose:
       - "8000"
     depends_on:
@@ -48,23 +48,27 @@ services:
 
   huey:
     << : *default-django
-    command: python manage.py run_huey -w 2
+    command: python manage.py run_huey
     depends_on:
       - django
     restart: unless-stopped
 
   caddy:
     image: caddy:2
-    command: "caddy run --config /etc/caddy/${CADDYFILE:-Caddyfile.local} --adapter caddyfile"
+    command: "caddy run --config /etc/caddy/Caddyfile.dev --adapter caddyfile"
     env_file:
       - .env
     ports:
       - "${PORT:-81}:${PORT:-81}"
     volumes:
       - ./caddy:/etc/caddy
+      - caddy_data:/data
+      - caddy_config:/config
     depends_on:
       - django
     restart: unless-stopped
 
 volumes:
+  caddy_data:
+  caddy_config:
   postgres_data:

@@ -1,4 +1,4 @@
--r core.pip
+-r base.pip
 django-debug-toolbar
 pytest
 pytest-django

@@ -1,9 +1,6 @@
 import Caddyfile.base
 
-# SITES
-# https://caddyserver.com/docs/caddyfile-tutorial#multiple-sites
-
-http://{$DOMAIN}:{$PORT} {
+{$DOMAIN} {
     import site_base
     
     # reverse proxy all requests

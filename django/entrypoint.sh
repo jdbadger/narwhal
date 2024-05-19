@@ -1,16 +1,24 @@
 #!/bin/sh
 
-if [ "$DATABASE" = "postgres" ]
+echo "Checking postgres is ready..."
+
+until pg_isready -d "$DJANGO_DATABASE_URL"
+do
+    sleep 2
+done
+
+echo "Postgres is ready!"
+
+python manage.py migrate --no-input
+
+if [ "$DJANGO_SETTINGS_MODULE" = "core.settings.dev" ]
 then
-    echo "Waiting for postgres..."
-
-    while ! nc -z $SQL_HOST $SQL_PORT; do
-      sleep 0.1
-    done
-
-    echo "PostgreSQL started"
+    python manage.py createsuperuser --no-input
 fi
 
-python manage.py collectstatic --no-input
+if [ "$DJANGO_SETTINGS_MODULE" = "core.settings.prod" ]
+then
+    python manage.py collectstatic --no-input
+fi
 
 exec "$@"

@@ -1,9 +1,12 @@
 from .base import *
 
+from django.core.management.utils import get_random_secret_key
 
-DEBUG = True
+ALLOWED_HOSTS = []
 
-ALLOWED_HOSTS = ['*']
+DEBUG = 1
+
+SECRET_KEY = get_random_secret_key()
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -16,12 +19,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-if not all((AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_STORAGE_BUCKET_NAME)):
-    STORAGES['default'] = {
-        'BACKEND': 'django.core.files.storage.InMemoryStorage'
-    }
-    STORAGES['private'] = STORAGES['default']
-    STORAGES['public'] = STORAGES['default']
+STORAGES['default'] = {'BACKEND': 'django.core.files.storage.InMemoryStorage'}
+STORAGES['private'] = STORAGES['default']
+STORAGES['public'] = STORAGES['default']
 
 # django-debug-toolbar
 INSTALLED_APPS = INSTALLED_APPS + ['debug_toolbar', ]

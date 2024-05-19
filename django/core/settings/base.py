@@ -1,30 +1,27 @@
 import os
 from pathlib import Path
 
-from django.core.management.utils import get_random_secret_key
-
 import environ
 from huey import RedisHuey
 from redis import ConnectionPool
 
+env = environ.Env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # load variables from .env file
-env = environ.Env()
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+environ.Env.read_env(os.path.join(Path(BASE_DIR).resolve().parent, '.env'))
 
-# default is False
+ENV = env('DJANGO_SETTINGS_MODULE').split('.')[2]
+
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG')
+DEBUG = 0
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = env('DJANGO_SECRET_KEY')
 
-ALLOWED_HOSTS = env('ALLOWED_HOSTS').split(" ")
-
-# Application definition
+ALLOWED_HOSTS = env('DJANGO_ALLOWED_HOSTS')
 
 INTERNAL_APPS = [
     'users',
@@ -41,13 +38,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    *THIRD_PARTY_APPS,
     *INTERNAL_APPS,
+    *THIRD_PARTY_APPS,
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # whitenoise
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # whitenoise
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -79,21 +76,14 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {'default': env.db()}
+DATABASES = {'default': env.db(var='DJANGO_DATABASE_URL')}
 DATABASES['default']['CONN_MAX_AGE'] = 60
 DATABASES['default']['ATOMIC_REQUESTS'] = True
 
-# Cache
+# Caches
 # https://docs.djangoproject.com/en/4.2/ref/settings/#caches
 
-CACHES = {'default': env.cache()}
-
-# Huey
-
-HUEY_URL = env('HUEY_URL')
-HUEY_NAME = DATABASES['default']['NAME']
-CONNECTION_POOL = ConnectionPool.from_url(HUEY_URL, max_connections=20)
-HUEY = RedisHuey(HUEY_NAME, connection_pool=CONNECTION_POOL)
+CACHES = {'default': env.cache(var='DJANGO_CACHE_URL')}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -124,39 +114,43 @@ USE_I18N = True
 
 USE_TZ = True
 
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/4.2/howto/static-files/
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_URL = '/static/'
+
 # Storages
 # https://docs.djangoproject.com/en/4.2/ref/settings/#std-setting-STORAGES
 
 STORAGES = {
-    "default": {
-        "BACKEND": 'django.core.files.storage.FileSystemStorage',
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
     },
-    "staticfiles": {
-        "BACKEND": 'django.contrib.staticfiles.storage.StaticFilesStorage',
+    'staticfiles': {
+        # Static files served via Whitenoise (compressed and cached)
+        # https://github.com/evansd/whitenoise/blob/main/docs/django.rst
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
     },
-}
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
-
-STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / "staticfiles"
-STORAGES['staticfiles'] = {
-    # Static files served via Whitenoise (compressed and cached)
-    # https://github.com/evansd/whitenoise/blob/main/docs/django.rst
-    'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
 }
 
 # s3
 
-AWS_ACCESS_KEY_ID = env.get_value('AWS_ACCESS_KEY_ID', default=None)
-AWS_SECRET_ACCESS_KEY = env.get_value('AWS_SECRET_ACCESS_KEY', default=None)
-AWS_STORAGE_BUCKET_NAME = env.get_value(
-    'AWS_STORAGE_BUCKET_NAME', default=None)
+AWS_ACCESS_KEY_ID = env.get_value('DJANGO_AWS_ACCESS_KEY_ID', default=None)
+AWS_SECRET_ACCESS_KEY = env.get_value('DJANGO_AWS_SECRET_ACCESS_KEY', default=None)
+AWS_STORAGE_BUCKET_NAME = env.get_value('DJANGO_AWS_STORAGE_BUCKET_NAME', default=None)
 if all((AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_STORAGE_BUCKET_NAME)):
     STORAGES['default'] = {'BACKEND': 'utils.storages.S3StoragePrivate'}
     STORAGES['private'] = {'BACKEND': 'utils.storages.S3StoragePrivate'}
     STORAGES['public'] = {'BACKEND': 'utils.storages.S3StoragePublic'}
+
+# Huey
+
+BROKER_URL = env.get_value('DJANGO_BROKER_URL', None)
+if BROKER_URL:
+    CONNECTION_POOL = ConnectionPool.from_url(BROKER_URL, max_connections=20)
+    HUEY_NAME = DATABASES['default']['NAME']
+    HUEY = RedisHuey(HUEY_NAME, connection_pool=CONNECTION_POOL)
 
 # Custom User Model
 

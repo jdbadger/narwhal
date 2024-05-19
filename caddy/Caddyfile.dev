@@ -1,11 +1,8 @@
 import Caddyfile.base
 
-# SITES
-# https://caddyserver.com/docs/caddyfile-tutorial#multiple-sites
-
-{$DOMAIN} {
+http://{$DOMAIN}:{$PORT} {
     import site_base
-
+    
     # reverse proxy all requests
     # https://caddyserver.com/docs/caddyfile/patterns#reverse-proxy
     reverse_proxy http://django:8000 {

@@ -1,11 +1,10 @@
-Django==4.2.8
+Django>=4.2
 django-environ
-django-filter
 django-storages[s3]
 gunicorn
 hiredis
 huey
-psycopg[binary]
+psycopg[binary,pool]
 python-dateutil
 redis[hiredis]
 uvicorn

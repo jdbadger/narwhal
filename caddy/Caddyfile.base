@@ -6,12 +6,7 @@
     file_server
     # https://caddyserver.com/docs/caddyfile/patterns#static-file-server
 
-    handle_errors {    
-        @4xx expression `{err.status_code} >= 400 && {err.status_code} < 500`
-        handle @4xx {
-            rewrite * /error_4xx.html
-        }
-
+    handle_errors {
         @5xx expression `{err.status_code} >= 500 && {err.status_code} < 600`
         handle @5xx {
             rewrite * /error_5xx.html

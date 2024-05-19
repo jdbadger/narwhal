@@ -1,17 +1,18 @@
-version: "3.9"
-
 x-default-django:
   &default-django
   build:
-    context: ../django
-    dockerfile: dockerfiles/Dockerfile
+    context: ./django
+    dockerfile: Dockerfile
     args:
       UNAME: "${USER:-app}"
       UID: "${UID:-1000}"
+      REQUIREMENTS: "${REQUIREMENTS:-/requirements/prod.pip}"
   env_file:
-    - ../django/.env
+      - .env
+  environment:
+    DJANGO_SETTINGS_MODULE: core.settings.prod
   volumes:
-    - ../django:/home/app/django
+    - ./django:/home/app/django
   tty: true
   stdin_open: true
 
@@ -24,6 +25,7 @@ services:
   django:
     << : *default-django
     command: python -m gunicorn core.asgi:application -k uvicorn.workers.UvicornWorker
+    entrypoint: /home/${USER:-app}/code/entrypoint.sh
     expose:
       - "8000"
     depends_on:
@@ -32,14 +34,14 @@ services:
 
   huey:
     << : *default-django
-    command: django-admin run_huey -w 2
+    command: django-admin run_huey
     depends_on:
       - django
     restart: unless-stopped
 
   caddy:
     image: caddy:2
-    command: "caddy run --config /etc/caddy/${CADDYFILE} --adapter caddyfile"
+    command: "caddy run --config /etc/caddy/Caddyfile.prod --adapter caddyfile"
     env_file:
       - .env
     ports:
@@ -56,4 +58,5 @@ services:
 
 volumes:
   caddy_data:
+    external: true
   caddy_config:
