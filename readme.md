@@ -32,35 +32,33 @@ Narwhal **_does not_** provide an environment/secrets management solution. If yo
 
 - Navigate to the project root.
 
-- Create new .env files using `docker/.env.example` and `django/.env.example` files.
+- Create a new .env file using `.env.example`.
 
   ```
-  $ cp ./docker/.env.example ./docker/.env
-  $ cp ./django/.env.example ./django/.env
+  $ cp .env.example ./docker/.env
   ```
 
-- Make any additions and changes to .env files and caddyfiles/templates according to your project requirements.
+- Make any additions and changes to your .env file and caddy/srv templates according to your project requirements.
 
-  - `USER` (`$ whoami`) and `UID` (`$ id -u $(whoami)`) in `docker/.env`. It's not necessary to provide any additional configuration to bring up the application, but `USER` and `UID` should be defined at a minimum.
+  - `USER` (`$ whoami`) and `UID` (`$ id -u $(whoami)`) in `.env`. It's not necessary to provide any additional configuration to bring up the application, but `USER` and `UID` should be defined at a minimum.
 
   - `COMPOSE_PROJECT_NAME` in `docker/.env`
 
-  - Add your AWS S3 development bucket credentials to `django/.env` if you want to use S3 for storages in development.
+  - Add your AWS S3 development bucket credentials to `.env` if you want to use S3 for storages in development.
 
   - Add or change any other `.env` definitions according to your project requirements.
 
-  - Optionally customize caddyfiles. Need dedicated subdomains for api and client services? Just edit `docker/caddy/Caddyfile.*` accordingly.
+  - Optionally customize caddyfiles. Need dedicated subdomains for api and client services? Just edit `caddy/Caddyfile*` accordingly.
 
-  - Customize Caddy-served templates in `docker/caddy/srv/`. These include references to `Narwhal`. Change them according to your project requirements.
+  - Customize Caddy-served templates in `caddy/srv/`. These include references to `Narwhal`. Change them according to your project requirements.
 
 - Bring up the containers:
 
 ```
-$ cd docker
 $ docker-compose up -d --build
 ```
 
-- In your browser, navigate to `localhost:81` (or the host and port you assigned in `docker/.env`). Here you should see the default Django startup page.
+- In your browser, navigate to `localhost:81` (or the host and port you assigned in `.env`). Here you should see the default Django startup page.
 
 - Navigate to `localhost:81/admin/` for the admin login page. You can log in using the superuser account `super@example.com` and the default password `secret`. **_Note_**: It's a security best practice to change the `/admin/` path to anything other than `/admin/`. There's no better time than now!
 

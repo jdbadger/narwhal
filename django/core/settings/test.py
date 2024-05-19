@@ -2,12 +2,11 @@ from .base import *
 
 from django.core.management.utils import get_random_secret_key
 
+ALLOWED_HOSTS = []
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
-
-SECRET_KEY = get_random_secret_key()
+SECRET_KEY = env.get_value('SECRET_KEY', default=get_random_secret_key())
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -18,8 +17,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-STORAGES['default'] = {
-    'BACKEND': 'django.core.files.storage.InMemoryStorage'
-}
+STORAGES['default'] = {'BACKEND': 'django.core.files.storage.InMemoryStorage'}
 STORAGES['private'] = STORAGES['default']
 STORAGES['public'] = STORAGES['default']

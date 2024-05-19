@@ -20,17 +20,17 @@ ENV PYTHONUNBUFFERED 1
 COPY requirements /requirements
 RUN python3 -m venv /venv
 RUN /venv/bin/pip install --upgrade pip
-RUN /venv/bin/pip install -r /requirements/core.pip
+RUN /venv/bin/pip install -r /requirements/requirements.pip
 
 #--FINAL--#
 
 FROM base as final
 
 # install system dependencies
-# RUN apt update && \
-#     apt install -y --no-install-recommends \
-#     ---add packages here--- \
-#     && rm -rf /var/lib/apt/lists/*
+RUN apt update && \
+    apt install -y --no-install-recommends \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
 
 ARG UNAME
 ARG UID

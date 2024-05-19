@@ -4,6 +4,14 @@ import Caddyfile.base
 # https://caddyserver.com/docs/caddyfile-tutorial#multiple-sites
 
 {$DOMAIN} {
+    basic_auth {
+        # basicauth to keep the bots out
+        # user:pass | 'caddy:caddy'
+        # - encrypt password using 'caddy hash-password' command
+        caddy $2a$14$k19kcFRiFlbZjeaYNkSgbOhZpe8k/4IxHN1lBVmsOkBTEsq1Dl/5u
+    }
+    # https://caddyserver.com/docs/caddyfile/directives/basicauth#basicauth
+
     import site_base
 
     # reverse proxy all requests
